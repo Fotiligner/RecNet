@@ -1,0 +1,14 @@
+GPU_ID=$1
+GPU_COUNT=$(echo "$GPU_ID" | awk -F',' '{print NF}')
+
+model=""
+model_name=deepseek-r1-distill-qwen-32b-awq
+
+CUDA_VISIBLE_DEVICES=${GPU_ID} vllm serve ${model} \
+  --enable-reasoning --reasoning-parser deepseek_r1 \
+  --served-model-name ${model_name} --port "$2" \
+  --trust-remote-code --tensor-parallel-size "${GPU_COUNT}" --gpu-memory-utilization 0.95 --swap-space 0 --max-num-seqs 1024 \
+  --disable-custom-all-reduce --enforce-eager --seed 42 \
+  --enable-prefix-caching \
+  --uvicorn-log-level warning --disable-log-requests \
+  # --max_model_len 65536
